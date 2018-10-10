@@ -13,16 +13,19 @@
 // page ~534 for semaphores in book 
 // 
 // shared memory key and size of shared memory.. size of an int(4 bytes)
-#define SHMKEY 321800
+#define SHMKEYA 321800
 #define SHMKEYB 321801
 #define BUFF_SZ	sizeof ( int )
 
 //shared memory function
-void sharedMemory(int n, int s);
+void sharedMemory(int s);
 void signalHandler(int sig);
 
 int main(int argc, char* argv[])
 {
+  //catch CTRL+C and clean up memory
+  signal(SIGINT, signalHandler);
+
   	int input, s, l, t; // s total number of children 5 is default.. l is logfile... t is time default i 2
 	char *fileName = "log.out";
 
@@ -52,6 +55,7 @@ int main(int argc, char* argv[])
             }
 	   else if(s == 0)
 		{
+     printf("\nS is set to default value of 5\n");
 		 	s = 5;
 		}
         	 printf("case s: %d\n", s);
@@ -66,6 +70,7 @@ int main(int argc, char* argv[])
 		printf("case t: %d",t);
 		if(t == 0)
 		{
+       printf("\nT value is set to default value of 2\n");
 			t = 2;
 		}
 	break;
@@ -81,13 +86,45 @@ int main(int argc, char* argv[])
 	
 	 }
 	
-	}
+	} 
 
 // variables for shared memory
 // Clock[0]  is seconds clock[1] is nanoseconds
 // shmMsg is the msg containing child PID seconds and nanoseconds
   int *clock;
   int *shmMsg;
+  
+  //create sharedMemory --------------------------
+  
+ int shmidA = shmget (SHMKEYA,BUFF_SZ , 0711 | IPC_CREAT );
+   if (shmidA == -1)
+   {
+     printf("OSS:shmid Error in shmgetA \n");
+     exit(1);
+   } 
+  //get shared memoryB ID B and check for errors
+  int shmidB = shmget(SHMKEYB,BUFF_SZ, 0711 | IPC_CREAT );
+	if(shmidB == -1)
+	{
+	printf("OSS:shmidB Error in shmgetB \n ");
+	exit(1);
+	}
+ 
+   // attach to memory
+   clock = shmat(shmidA, NULL, 0);
+   shmMsg = shmat(shmidB, NULL, 0);
+   
+//   char * paddr = ( char * ) (shmat (shmidA, NULL, 0) );
+//   
+//   int * pint = (int *) (paddr);
+  //------ end sharedMemory-----------------------
+  
+  
+  clock[0] = 0; //seconds
+  clock[1] = 0; //nanoseconds
+  shmMsg[0] = 0; //user PID 
+  shmMsg[1] = 0; //seconds
+  shmMsg[2] = 0; //nanoseconds
   	
 
 
@@ -95,29 +132,14 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void sharedMemory(int n, int s)
+void sharedMemory(int s)
 {
-    //  printf("sharedmemory: \n");
-    int count = 0;
-  // get shared memory segment ID.. not 100% of this 
-   int shmid = shmget (SHMKEY,BUFF_SZ , 0711 | IPC_CREAT );
-   if (shmid == -1)
-   {
-     printf("OSS:shmid Error in shmget \n");
-     exit(1);
-   } 
-  
-  int shmidB = shmget(SHMKEYB,BUFF_SZ, 0711 | IPC_CREAT );
-	if(shmidB == -1)
-	{
-	printf("OSS:shmidB Error in shmget\n ");
-	exit(1);
-	}
-   
-   char * paddr = ( char * ) (shmat (shmid, NULL, 0) );
-   int * pint = (int *) (paddr);
-}
 
+    int count = 0;
+  // get shared memory segment IDA.. not 100% of this and check for errors
+  
+}
+//------signal handler for CTRL+C
 void signalHandler(int sig)
 {
   if( sig == SIGINT)
