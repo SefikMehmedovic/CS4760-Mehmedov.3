@@ -11,18 +11,10 @@
 #define SHMKEYB 321801
 #define BUFF_SZ	sizeof ( int )
 
-void childMemory();
-
 
 int main(int argc, char* argv[]) 
 {
-	
-	return 0;
-}
-
-void childMemory()
-{
-  int *clock;
+   int *clock;
   int *shmMsg;
 
   int shmidA = shmget (SHMKEYA,BUFF_SZ , 0711 | IPC_CREAT );
@@ -40,6 +32,9 @@ void childMemory()
 	}
    
     clock = shmat(shmidA, NULL, 0);
-    shmMsg = shmat(shmidB, NULL, 0);
+    shmMsg = shmat(shmidB, NULL, 0);	
+    
+	return 0;
  
 }
+

@@ -17,18 +17,29 @@
 #define SHMKEYB 321801
 #define BUFF_SZ	sizeof ( int )
 
-//shared memory function
-void sharedMemory(int s);
+//define semaphore
+sem_t *semaphore;
+
+#define SEM_NAME "/semaName"
+#define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
+#define MUTEX 1
 void signalHandler(int sig);
+
+pid_t *pcpids;
 
 int main(int argc, char* argv[])
 {
+ 
+  pid_t pid = 0;
+  
   //catch CTRL+C and clean up memory
   signal(SIGINT, signalHandler);
 
-  	int input, s, l, t; // s total number of children 5 is default.. l is logfile... t is time default i 2
-	char *fileName = "log.out";
-
+  	int input, s, l, t; // s total number of children 5 is default.. l is logfile... t is time default is 2
+  FILE *filePointer;
+	char *fileName = "log.txt";
+  
+  
 	while ((input = getopt (argc, argv, "hs:l:t:")) != -1)
 	
 	{
@@ -97,14 +108,14 @@ int main(int argc, char* argv[])
   //create sharedMemory --------------------------
   
  int shmidA = shmget (SHMKEYA,BUFF_SZ , 0711 | IPC_CREAT );
-   if (shmidA == -1)
+   if (shmidA < 0)
    {
      printf("OSS:shmid Error in shmgetA \n");
      exit(1);
    } 
   //get shared memoryB ID B and check for errors
   int shmidB = shmget(SHMKEYB,BUFF_SZ, 0711 | IPC_CREAT );
-	if(shmidB == -1)
+	if(shmidB < 0)
 	{
 	printf("OSS:shmidB Error in shmgetB \n ");
 	exit(1);
@@ -117,7 +128,7 @@ int main(int argc, char* argv[])
 //   char * paddr = ( char * ) (shmat (shmidA, NULL, 0) );
 //   
 //   int * pint = (int *) (paddr);
-  //------ end sharedMemory-----------------------
+  
   
   
   clock[0] = 0; //seconds
@@ -126,19 +137,42 @@ int main(int argc, char* argv[])
   shmMsg[1] = 0; //seconds
   shmMsg[2] = 0; //nanoseconds
   	
+//------ end sharedMemory-----------------------
 
+//open file to write-------
 
+filePointer = fopen(fileName, "w");
 
-	return 0;
+if(filePointer == NULL)
+{  
+  printf("\nError: opening file\n");
+  exit(1);
 }
+// end write file ------
 
-void sharedMemory(int s)
-{
+pid_t (*cpids)[s] = malloc(sizeof *cpids);
+pcpids = cpids;
 
-    int count = 0;
-  // get shared memory segment IDA.. not 100% of this and check for errors
-  
-}
+//fork child process
+
+for(int i = 0; i < s; i++){
+		(*cpids)[i] = fork();
+		if ((*cpids)[i] < 0) { 
+			printf("Fork failed!\n");
+			exit(1);
+		}
+		else if ((*cpids)[i] == 0){
+			// pass to the execlp the name of the code to exec
+			execl("./user", "user", NULL); 
+			printf("execl() failed!\n");
+			exit(1);
+		}
+	}
+
+
+	return 0; // main
+} // main end
+
 //------signal handler for CTRL+C
 void signalHandler(int sig)
 {
