@@ -6,7 +6,7 @@ objects = oss user
 all: $(objects)
 
 $(objects): %: %.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $< -pthread
 
 clean:
 	rm $(objects)

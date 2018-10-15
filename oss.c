@@ -9,6 +9,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <fcntl.h>
+#include <time.h>
 
 // page ~534 for semaphores in book 
 // 
@@ -17,12 +19,13 @@
 #define SHMKEYB 321801
 #define BUFF_SZ	sizeof ( int )
 
-//define semaphore
+//semaphore
 sem_t *semaphore;
+sem_t MUTEX;
 
-#define SEM_NAME "/semaName"
-#define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
-#define MUTEX 1
+//#define SEM_NAME "/semaName"
+//#define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
+//#define MUTEX 1
 void signalHandler(int sig);
 
 pid_t *pcpids;
@@ -35,7 +38,13 @@ int main(int argc, char* argv[])
   //catch CTRL+C and clean up memory
   signal(SIGINT, signalHandler);
 
-  	int input, s, l, t; // s total number of children 5 is default.. l is logfile... t is time default is 2
+  //semaphore---------
+  
+  semaphore = sem_open("sem_name", O_CREAT | O_EXCL, 0711, MUTEX);
+  
+  //end semaphore-------
+
+  int input, s, l, t; // s total number of children 5 is default.. l is logfile... t is time default is 2
   FILE *filePointer;
 	char *fileName = "log.txt";
   
@@ -154,23 +163,31 @@ pid_t (*cpids)[s] = malloc(sizeof *cpids);
 pcpids = cpids;
 
 //fork child process
-
-for(int i = 0; i < s; i++){
+int i = 0;
+for(i; i < s; i++){
 		(*cpids)[i] = fork();
 		if ((*cpids)[i] < 0) { 
 			printf("Fork failed!\n");
 			exit(1);
 		}
 		else if ((*cpids)[i] == 0){
-			// pass to the execlp the name of the code to exec
+			
 			execl("./user", "user", NULL); 
 			printf("execl() failed!\n");
 			exit(1);
 		}
 	}
+//-- time vars and time calculation
+
+time_t startTime, endTime;
+
+startTime = time(NULL);
+endTime = startTime + t;
+
+fprintf(filePointer,"Starting loop");
 
 
-	return 0; // main
+return 0; // main
 } // main end
 
 //------signal handler for CTRL+C
