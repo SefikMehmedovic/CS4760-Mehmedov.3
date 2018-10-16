@@ -20,24 +20,24 @@ sem_t MUTEX;
 
 int main(int argc, char* argv[]) 
 {
-  //printf("CHILD\n");\
+  printf("CHILD\n");\
   
   
   //semaphore---------
   
-  semaphore = sem_open("sem_name", O_CREAT | O_EXCL, 0711, MUTEX);
+  semaphore = sem_open("sem_name", O_CREAT | O_EXCL, 0777, MUTEX);
   //end Semaphore -------
   int *clock;
   int *shmMsg;
 
-  int shmidA = shmget (SHMKEYA,BUFF_SZ , 0711 | IPC_CREAT );
+  int shmidA = shmget (SHMKEYA,BUFF_SZ , 0777 | IPC_CREAT );
   if (shmidA == -1)
    {
     printf("User: Error in shmgetA..\n");
     return 1;
    }
    
-  int shmidB = shmget(SHMKEYB,BUFF_SZ, 0711 | IPC_CREAT ); 
+  int shmidB = shmget(SHMKEYB,BUFF_SZ, 0777 | IPC_CREAT ); 
 	if(shmidB == -1)
 	{
 	printf("User: Error in shmgetB \n ");

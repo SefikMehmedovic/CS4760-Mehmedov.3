@@ -19,16 +19,13 @@
 #define SHMKEYB 321801
 #define BUFF_SZ	sizeof ( int )
 
-//semaphore
-sem_t *semaphore;
-sem_t MUTEX;
 
-//#define SEM_NAME "/semaName"
-//#define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
-//#define MUTEX 1
 void signalHandler(int sig);
+void cleanUp();
 
 pid_t *pcpids;
+
+int shmidA, shmidB;
 
 int main(int argc, char* argv[])
 {
@@ -39,8 +36,14 @@ int main(int argc, char* argv[])
   signal(SIGINT, signalHandler);
 
   //semaphore---------
+ 
+   sem_t *semaphore = sem_open ("sem_name", O_CREAT | O_EXCL, 0777 , 1);
   
-  semaphore = sem_open("sem_name", O_CREAT | O_EXCL, 0711, MUTEX);
+//  if (semaphore == SEM_FAILED) {
+//		printf("\nERROR: OSS semaphore :\n");
+//     
+//     exit(EXIT_FAILURE);
+//    }
   
   //end semaphore-------
 
@@ -116,14 +119,14 @@ int main(int argc, char* argv[])
   
   //create sharedMemory --------------------------
   
- int shmidA = shmget (SHMKEYA,BUFF_SZ , 0711 | IPC_CREAT );
+  shmidA = shmget (SHMKEYA,BUFF_SZ , 0777 | IPC_CREAT );
    if (shmidA < 0)
    {
      printf("OSS:shmid Error in shmgetA \n");
      exit(1);
    } 
   //get shared memoryB ID B and check for errors
-  int shmidB = shmget(SHMKEYB,BUFF_SZ, 0711 | IPC_CREAT );
+   shmidB = shmget(SHMKEYB,BUFF_SZ, 0777 | IPC_CREAT );
 	if(shmidB < 0)
 	{
 	printf("OSS:shmidB Error in shmgetB \n ");
@@ -196,6 +199,12 @@ void signalHandler(int sig)
   if( sig == SIGINT)
   {
     printf("OSS: CTRL+C Caught: Memory Clean Up");
+    cleanUp()
   }
 }
 
+void cleanUp()
+{
+  shmctl(shmidA, IPC_RMID, NULL);
+  shmctl(shmidB, IPC_RMID, NULL);
+}
