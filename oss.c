@@ -23,6 +23,7 @@
 void signalHandler(int sig);
 void cleanUp();
 
+sem_t *semaphore;
 pid_t *pcpids;
 
 int shmidA, shmidB;
@@ -33,17 +34,17 @@ int main(int argc, char* argv[])
   pid_t pid = 0;
   
   //catch CTRL+C and clean up memory
-  signal(SIGINT, signalHandler);
+  signal(SIGTERM, signalHandler);
 
   //semaphore---------
  
-   sem_t *semaphore = sem_open ("sem_name", O_CREAT | O_EXCL, 0777 , 1);
+   semaphore = sem_open ("sem_name", IPC_CREAT | IPC_EXCL, 0777 , 1);
   
-//  if (semaphore == SEM_FAILED) {
-//		printf("\nERROR: OSS semaphore :\n");
-//     
-//     exit(EXIT_FAILURE);
-//    }
+  if (semaphore == SEM_FAILED) {
+		printf("\nERROR: OSS semaphore :\n");
+     
+     exit(EXIT_FAILURE);
+    }
   
   //end semaphore-------
 
@@ -91,7 +92,7 @@ int main(int argc, char* argv[])
 	case 't':
 		t = atoi(optarg);
 		printf("case t: %d",t);
-		if(t == 0)
+		if(t == 0 || t <= 0)
 		{
        printf("\nT value is set to default value of 2\n");
 			t = 2;
@@ -165,6 +166,8 @@ if(filePointer == NULL)
 pid_t (*cpids)[s] = malloc(sizeof *cpids);
 pcpids = cpids;
 
+int kidLimit = 100; //limit of max process allowed
+
 //fork child process
 int i = 0;
 for(i; i < s; i++){
@@ -186,10 +189,46 @@ time_t startTime, endTime;
 
 startTime = time(NULL);
 endTime = startTime + t;
+int hundredK = 100000;
+int maxNano = 1000000000;
 
-fprintf(filePointer,"Starting loop");
+fprintf(filePointer,"Starting loop......\n");
 
 
+
+while((startTime < endTime) && (s != kidLimit ))
+{ //start while loop
+  int temp;
+
+  startTime = time(NULL);
+  clock[1]+= hundredK;
+  
+  if(clock[1] == maxNano)
+  {
+    clock[1] = 0;
+    clock[0] ++;
+  }
+  
+  if(shmMsg[0] != 0 || shmMsg[1] != 0 || shmMsg[2] !=0)
+  {  
+    int i;
+    for(i=0; i<s; i++)
+    {
+      if((*cpids)[i] == shmMsg[0])
+      {
+        temp = i;
+      }
+    }
+    
+    printf("OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d\n in user", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
+		 fprintf("OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d\n in user", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
+      
+      
+  }
+} //end while loop 
+
+fclose(filePointer); //close write file
+cleanUp(); //call clean up at the end
 return 0; // main
 } // main end
 
@@ -199,12 +238,16 @@ void signalHandler(int sig)
   if( sig == SIGINT)
   {
     printf("OSS: CTRL+C Caught: Memory Clean Up");
-    cleanUp()
+    cleanUp();
   }
 }
 
 void cleanUp()
 {
+  printf("\nClean up started....\n");
   shmctl(shmidA, IPC_RMID, NULL);
   shmctl(shmidB, IPC_RMID, NULL);
+  free(pcpids);
+  sem_close(semaphore);
+  
 }

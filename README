@@ -1,0 +1,24 @@
+Sefik Mehmedovic
+CS 4760 OS
+Program 3 -- Semaphores and Operating System Simulator --
+
+To run the program. 
+1. compile by running 'make'
+1.5 you will get two executables 
+2. run ./oss -h to get the list of options and an example of how to run
+3. an example to run this program would be ./oss -s 10 
+  lunches oss with 10 children process and it should terminate all of them once done
+4. type 'make clean' to remove all .o files in the directory 
+
+
+
+-h is help and displays all of the naming options
+-s is the amount of children to spawn max is 20
+-l is the name of the log file. default is log.txt
+-t is the time in sets where the master will terminate itself dfefault is 2
+
+
+Notes -----
+
+semaphores are complicated to set up. Every example is different and i had an issue 
+where a semaphore would close randomly on its on.
