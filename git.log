@@ -1,0 +1,8 @@
+* 51a36ab : not sure if semaphore isn't working or shared memory
+* e92feae : update semaphore and fork
+* e3a2c84 : user.c updated process and shmmsg and clock counter
+* 0d0bd00 : updated fork
+* 11ac33a : updated shared memory
+* 83570a1 : Added statesment to prevent more than 20 process, set the defaults, setup sharedmemory, and everything compiles
+* aa04930 : updated option handling
+* 2a221dd : makefile updated and oss and user files updated

@@ -18,7 +18,8 @@ To run the program.
 -t is the time in sets where the master will terminate itself dfefault is 2
 
 
-Notes -----
+Notes/issues -----
 
-semaphores are complicated to set up. Every example is different and i had an issue 
-where a semaphore would close randomly on its on.
+-l is not implemented... will not take log file rename 
+
+program seems to pause in user and not return.. not sure why and ran out of time to debug

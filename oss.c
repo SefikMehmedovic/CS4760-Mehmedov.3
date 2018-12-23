@@ -155,6 +155,7 @@ int main(int argc, char* argv[])
 //open file to write-------
 
 filePointer = fopen(fileName, "w");
+fprintf(filePointer,"Starting Log--------\n");
 
 if(filePointer == NULL)
 {  
@@ -192,10 +193,6 @@ endTime = startTime + t;
 int hundredK = 100000;
 int maxNano = 1000000000;
 
-fprintf(filePointer,"Starting loop......\n");
-
-
-
 while((startTime < endTime) && (s != kidLimit ))
 { //start while loop
   int temp;
@@ -220,8 +217,8 @@ while((startTime < endTime) && (s != kidLimit ))
       }
     }
     
-    printf("OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d\n in user", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
-		 fprintf("OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d\n in user", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
+    printf("OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d\n in user\n", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
+		 fprintf(filePointer,"OSS: Child %d is terminating at my time %d.%d | because it reached %d.%d in user\n", shmMsg[0], clock[0], clock[1], shmMsg[1], shmMsg[2]);
       
       
   }
